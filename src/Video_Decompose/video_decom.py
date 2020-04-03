@@ -2,17 +2,17 @@ import numpy as np
 import signal
 import cv2 as cv
 import imutils
-import fps_thread
+from fps_thread import BoostedFPS
 import os
 
 
 cv.namedWindow('image', cv.WINDOW_NORMAL)
-#cv.namedWindow('filtered', cv.WINDOW_NORMAL)
+cv.namedWindow('filtered', cv.WINDOW_NORMAL)
 
 class VideoCV(object):
 	def __init__(self):
 		self.frame = None
-		self.boostfps = fps_thread.BoostedFPS('test_countryroad.mp4')
+		self.boostfps = BoostedFPS('test_countryroad.mp4')
 				
 		self.init_video()
 
@@ -41,9 +41,9 @@ def threshHSV(img):
 	
 def process_frame(img):
 	try:
-		#processed_img = extractCorner(img)
+		processed_img = extractCorner(img)
 		cv.imshow('image', img)
-		#cv.imshow('filtered', processed_img)
+		cv.imshow('filtered', processed_img)
 		cv.waitKey(1)
 	except:
 		pass
@@ -56,6 +56,7 @@ if __name__ == '__main__':
 	while running:
 		videocv.frame = videocv.bstream.getFrame()
 		process_frame(videocv.frame)
+		running = videocv.bstream.checkBuffer()		
 
 	cv.destroyAllWindows()
 
