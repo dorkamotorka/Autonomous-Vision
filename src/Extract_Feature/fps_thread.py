@@ -1,11 +1,15 @@
+import sys
+sys.path.append('..')
+from logger import Logger
 from threading import Thread
 from queue import Queue
 import cv2 as cv
 
+log = Logger('Fps_thread')
 
 class BoostedFPS:
-	def __init__(self, src=0, queueSize=100000000000):
-		'''Video stream thread setup'''
+	def __init__(self, src=0, queueSize=10000):
+		'''Video stream thread setup'''		
 		self.stream =  cv.VideoCapture(src)
 		self.frame = None
 		self.stopped = False
@@ -25,7 +29,7 @@ class BoostedFPS:
 
 	def checkBuffer(self):
 		if self.Q.full():
-			print("Frame Queue full!")
+			log.error("Frame Queue full!")
 			return False
 		else:
 			return self.Q.qsize() > 0
