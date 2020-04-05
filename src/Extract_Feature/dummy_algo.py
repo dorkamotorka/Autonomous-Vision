@@ -16,3 +16,17 @@ def threshHSV(self, img):
 	konjugated = cv.bitwise_and(img, img, mask=threshed)
 	
 	return konjugated
+
+
+
+#colorspace_flags = [i for i in dir(cv) if i.startswith('COLOR_')]
+#print(flags)
+
+#check HSV values for colors
+#green = np.uint8([[[0,255,0 ]]])
+#hsv_green = cv.cvtColor(green,cv.COLOR_BGR2HSV)
+#print( hsv_green )
+
+#white
+#lower_thresh = np.array([0,0,200])
+#upper_thresh = np.array([180,50,255])
