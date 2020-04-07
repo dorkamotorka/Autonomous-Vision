@@ -42,7 +42,7 @@ class FeatureExtract(object):
 			matches = self.bf.match(des, self.prev_des) # zabije!
 		self.prev_des = des			
 		self.filter_img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
-		kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp])
+		kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp]) # np.array -- problems with multiprocessing
 
 		return kp, des, matches
 
