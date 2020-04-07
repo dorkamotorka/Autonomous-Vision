@@ -16,9 +16,13 @@ class FeatureExtract(object):
 		# COMBO Algorithm(FAST extractor + ORB descriptor)
 		self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
 		self.orb = cv.ORB_create(nfeatures=700, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
-		self.combo_kp = None
-		self.combo_descr = None
+		FLANN_INDEX_LSH = 6
+		index_params = dict(algorithm = FLANN_INDEX_LSH, table_number = 12, key_size = 20, multi_probe_level = 1)
+		search_params = dict(checks=50)
+		#self.flann = cv.FlannBasedMatcher(index_params, search_params)
+		self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
 		signal.signal(signal.SIGINT, self.exit_program)
+		self.prev_des = None
 
 	def exit_program(self, *args): # put in slam
 		log.info("Exiting the program!")
@@ -27,12 +31,18 @@ class FeatureExtract(object):
 
 	def detectCornerCombo(self, img):
 		# extract
-		self.combo_kp = self.fast.detect(img, mask=None)
-		self.combo_kp = [cv.KeyPoint(x=kp.pt[0], y=kp.pt[1], _size=20) for kp in self.combo_kp] # zabije - adust _size
+		kp = self.fast.detect(img, mask=None)
+		kp = [cv.KeyPoint(x=kps.pt[0], y=kps.pt[1], _size=20) for kps in kp] # adjust _size
 		# describe
-		self.combo_kp, self.orb_descr = self.orb.compute(img, self.combo_kp)
-		img = cv.drawKeypoints(img, keypoints=self.combo_kp, outImage=None, color=(255,0,0))
-		self.combo_kp = np.array([(kp.pt[0], kp.pt[1]) for kp in self.combo_kp])
+		kp, des = self.orb.compute(img, kp)
+		# match
+		if self.prev_des is not None:
+			#matches = self.flann.knnMatch(self.prev_des, orb_des, k=2) # zabije!
+			matches = self.bf.match(des, self.prev_des) # zabije!
+		self.prev_des = des			
+		img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
+		kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp])
+		# create a dicitonary that this function returns - keypoints, description, matches
 
 		return img
 
