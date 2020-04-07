@@ -5,19 +5,18 @@ from threading import Thread
 from queue import Queue
 import cv2 as cv
 
-log = Logger('Fps_thread')
+log = Logger('FPS_Thread')
 
 class BoostedFPS:
-	def __init__(self, src=0, queueSize=1000):
+	def __init__(self, src=0, queueSize=100000):
 		'''Video stream thread setup'''
 		self.src = src		
-		self.Q = Queue(maxsize=queueSize) # frames queue
-		self.stopped = False
-		Thread(target=self.VideoStream, args=(self.stopped,), daemon=True).start()
+		self.Q = Queue(maxsize=queueSize)
+		Thread(target=self.VideoStream, daemon=True).start()
 
-	def VideoStream(self, stop):
+	def VideoStream(self):
 		stream =  cv.VideoCapture(self.src)
-		while not stop:
+		while True:
 			_, frame = stream.read()
 			self.Q.put(frame)		
 	
@@ -30,6 +29,3 @@ class BoostedFPS:
 			return False
 		else:
 			return self.Q.qsize() > 0
-
-	def stopStream(self):
-		self.stopped = True

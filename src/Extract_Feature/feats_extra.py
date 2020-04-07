@@ -9,7 +9,7 @@ import cv2 as cv
 cv.namedWindow('image', cv.WINDOW_NORMAL)
 cv.namedWindow('filtered', cv.WINDOW_NORMAL)
 
-log = Logger('Video_decom')
+log = Logger('Feats_Extract')
 
 class FeatureExtract(object):
 	def __init__(self):
@@ -23,35 +23,33 @@ class FeatureExtract(object):
 		self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
 		signal.signal(signal.SIGINT, self.exit_program)
 		self.prev_des = None
+		self.filter_img = None
 
 	def exit_program(self, *args): # put in slam
 		log.info("Exiting the program!")
-		#self.boostfps.stopStream()
 		os.system('pkill -9 python')	
 
-	def detectCornerCombo(self, img):
+	def detectCombo(self, img):
 		# extract
 		kp = self.fast.detect(img, mask=None)
 		kp = [cv.KeyPoint(x=kps.pt[0], y=kps.pt[1], _size=20) for kps in kp] # adjust _size
 		# describe
 		kp, des = self.orb.compute(img, kp)
 		# match
+		matches = None
 		if self.prev_des is not None:
 			#matches = self.flann.knnMatch(self.prev_des, orb_des, k=2) # zabije!
 			matches = self.bf.match(des, self.prev_des) # zabije!
 		self.prev_des = des			
-		img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
+		self.filter_img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
 		kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp])
-		# create a dicitonary that this function returns - keypoints, description, matches
 
-		return img
-
+		return kp, des, matches
 
 
 	def process_frame(self, img):
-		processed_img = self.detectCornerCombo(img)
-		cv.imshow('image', img) # put in fps booster?
-		cv.imshow('filtered', processed_img)
+		cv.imshow('image', img)
+		if self.filter_img is not None:
+			cv.imshow('filtered', self.filter_img)
 		cv.waitKey(1)
-
-
+	
