@@ -2,7 +2,6 @@ import sys
 sys.path.append('..')
 from logger import Logger
 from threading import Thread
-from multiprocessing import Process
 from queue import Queue
 import cv2 as cv
 
@@ -14,9 +13,7 @@ class BoostedFPS:
 		self.src = src		
 		self.Q = Queue(maxsize=queueSize) # frames queue
 		self.stopped = False
-		#Thread(target=self.VideoStream, daemon=True).start()
-		self.p = Process(target=self.VideoStream, args=(self.stopped,), daemon=True)
-		self.p.start()
+		Thread(target=self.VideoStream, args=(self.stopped,), daemon=True).start()
 
 	def VideoStream(self, stop):
 		stream =  cv.VideoCapture(self.src)
@@ -32,7 +29,6 @@ class BoostedFPS:
 			log.error("Frame Queue full!")
 			return False
 		else:
-			print(self.Q.qsize())
 			return self.Q.qsize() > 0
 
 	def stopStream(self):

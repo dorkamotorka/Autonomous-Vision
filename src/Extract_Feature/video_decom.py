@@ -1,8 +1,8 @@
 import sys
 sys.path.append('..')
 from logger import Logger
-sys.path.append('../GUI')
-from pango_cloud import Pango3D
+#sys.path.append('../GUI')
+#from pango_cloud import Pango3D
 import os
 import numpy as np
 import signal
@@ -21,7 +21,6 @@ log = Logger('Video_decom')
 class FeatureExtract(object):
 	def __init__(self):
 		self.frame = None
-		self.boostfps = BoostedFPS('test_countryroad.mp4')
 		# FAST Algorithm
 		self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 
 		self.fast_kp = None
@@ -36,10 +35,11 @@ class FeatureExtract(object):
 		self.features = None
 		# PANGO DISPLAY
 		#self.pango3d = Pango3D()
+		signal.signal(signal.SIGINT, self.exit_program)
 
 	def exit_program(self, *args):
 		log.info("Exiting the program!")
-		self.boostfps.stopStream()
+		#self.boostfps.stopStream()
 		os.system('pkill -9 python')	
 
 	def detectCornerCombo(self, img):
@@ -72,24 +72,8 @@ class FeatureExtract(object):
 	def process_frame(self, img):
 		processed_img = self.detectCornerFAST(img)
 		cv.imshow('image', img)
+		print(processed_img)
 		cv.imshow('filtered', processed_img)
 		cv.waitKey(1)
 
-
-if __name__ == '__main__':
-	feats = FeatureExtract()
-	signal.signal(signal.SIGINT, feats.exit_program)
-	start = cv.getTickCount()	
-
-	running = True
-	while running:
-		feats.frame = feats.boostfps.getFrame()
-		print('here')
-		feats.process_frame(feats.frame)
-		running = feats.boostfps.checkBuffer()
-
-	end = cv.getTickCount()		
-	exec_time = (end - start)/ cv.getTickFrequency()
-	log.info(f"Execution time: {exec_time} seconds")
-	cv.destroyAllWindows()
 
