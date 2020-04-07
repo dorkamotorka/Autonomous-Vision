@@ -17,7 +17,18 @@ def threshHSV(self, img):
 	
 	return konjugated
 
+def detectCornerFAST(self, img):
+	self.fast_kp = self.fast.detect(img, mask=None)	
+	img = cv.drawKeypoints(img, keypoints=self.fast_kp, outImage=None, color=(255,0,0))
 
+	return img
+
+def detectCornerORB(self, img):
+	self.orb_kp = self.orb.detect(img,mask=None)
+	self.orb_kp, self.orb_descr = self.orb.compute(img, self.orb_kp)
+	img = cv.drawKeypoints(img, keypoints=self.orb_kp, outImage=None, color=(255,0,0), flags=0)
+
+	return img
 
 #colorspace_flags = [i for i in dir(cv) if i.startswith('COLOR_')]
 #print(flags)
