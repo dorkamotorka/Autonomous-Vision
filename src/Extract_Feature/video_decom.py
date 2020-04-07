@@ -1,17 +1,10 @@
+import os
 import sys
 sys.path.append('..')
 from logger import Logger
-#sys.path.append('../GUI')
-#from pango_cloud import Pango3D
-import os
 import numpy as np
 import signal
 import cv2 as cv
-import imutils
-from fps_thread import BoostedFPS
-from multiprocessing import Process
-
-# FEATURE EXTRACTOR THREAD!
 
 cv.namedWindow('image', cv.WINDOW_NORMAL)
 cv.namedWindow('filtered', cv.WINDOW_NORMAL)
@@ -43,16 +36,13 @@ class FeatureExtract(object):
 		os.system('pkill -9 python')	
 
 	def detectCornerCombo(self, img):
-		# get keypoints
+		# extract
 		self.combo_kp = self.fast.detect(img, mask=None)
-		#print(self.combo_kp[0].pt[0])
-		self.combo_kp = [cv.KeyPoint(x=kp.pt[0], y=kp.pt[1], _size=1) for kp in self.combo_kp] # zabije
-		# describe keypoints
+		self.combo_kp = [cv.KeyPoint(x=kp.pt[0], y=kp.pt[1], _size=20) for kp in self.combo_kp] # zabije
+		# description
 		self.combo_kp, self.orb_descr = self.orb.compute(img, self.combo_kp)
+		img = cv.drawKeypoints(img, keypoints=self.combo_kp, outImage=None, color=(255,0,0))
 		self.combo_kp = np.array([(kp.pt[0], kp.pt[1]) for kp in self.combo_kp] ) # zabije
-		#print(self.combo_kp.shape)
-		#self.pango3d.read_pcl(self.combo_kp)
-		img = cv.drawKeypoints(img, keypoints=self.fast_kp, outImage=None, color=(255,0,0))
 
 		return img
 
@@ -70,9 +60,8 @@ class FeatureExtract(object):
 		return img
 
 	def process_frame(self, img):
-		processed_img = self.detectCornerFAST(img)
+		processed_img = self.detectCornerCombo(img)
 		cv.imshow('image', img)
-		print(processed_img)
 		cv.imshow('filtered', processed_img)
 		cv.waitKey(1)
 

@@ -6,6 +6,8 @@ from fps_thread import BoostedFPS
 from video_decom import FeatureExtract
 import cv2 as cv
 
+log = Logger('slam')
+
 if __name__ == '__main__':
 	feats = FeatureExtract()
 	booster = BoostedFPS('test_countryroad.mp4')
