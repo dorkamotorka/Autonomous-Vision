@@ -1,7 +1,5 @@
 import numpy as np
-#from threading import Thread
-from multiprocessing import Process, Lock
-from arrayqueues.shared_arrays import ArrayQueue
+from multiprocessing import Process, Queue
 import pangolin as pango
 import OpenGL.GL as gl
 import cv2 as cv
@@ -11,9 +9,8 @@ class Pango3D(object):
 		self.state = None
 		self.model = None
 		self.disp = None
-		self.Q = ArrayQueue(1) # 1MB of data
-		Process(target=self.process_disp, args=[self.Q], daemon=True).start()
-		#self.lock = Lock()
+		self.Q = Queue()
+		Process(target=self.process_disp, args=(self.Q,), daemon=True).start()
 
 	def process_disp(self, q):
 		self.init_disp()
@@ -47,6 +44,10 @@ class Pango3D(object):
 		pango.FinishFrame()
 
 	def read_pcl(self, keypoints):
-		print(keypoints) # get points but not in Q because of numpy array problem with multiprocessing
-		self.Q.put(keypoints)
+		#print(keypoints) # get points but not in Q because of numpy array problem with multiprocessing
+		# not working because data not pickled
+		pts = []
+		for kps in keypoints:
+			pts.append(kps)
+		self.Q.put(np.array(pts))
 		print(self.Q.empty())
