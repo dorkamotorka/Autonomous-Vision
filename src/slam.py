@@ -12,6 +12,7 @@ from multiprocessing import Process, Queue
 import pangolin as pango
 import OpenGL.GL as gl
 
+
 class Pango3D(object):
 	def __init__(self):
 		self.state = None
@@ -42,18 +43,19 @@ class Pango3D(object):
 		if self.state is None or not q.empty():
 			self.state = q.get()
 		
-		self.state = np.array(self.state)
-		print(self.state)
+		ppts = np.array(self.state)
+		print(ppts.shape)
 		gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 		gl.glClearColor(1.0, 1.0, 1.0, 1.0)
 		self.disp.Activate(self.model)
 		gl.glPointSize(10)
-		gl.glColor3f(1.0, 0.0, 0.0)
-		pango.DrawPoints(self.state)
+		gl.glColor3f(0.0, 1.0, 0.0)
+		pango.DrawPoints(ppts)
 			
 		pango.FinishFrame()
 
 	def read_pcl(self, keypoints):
+		# need to first convert it to proper 3D point! 
 		pts = []
 		for kps in keypoints:
 			pts.append(kps)
@@ -62,8 +64,14 @@ class Pango3D(object):
 		self.Q.put(pts) # np.array prev
 		#print(self.Q.empty())
 
-class Points(object):
-	pass
+#class Point(object):
+#	def __init__(self):
+#		pass
+
+def HomogenousCoord(pts):
+	# [x,y] -> [x,y,1]
+	pts = np.append(pts, np.ones([pts.shape[0], 1]), axis=1)
+	return pts
 
 pango3d = Pango3D()
 log = Logger('slam')
@@ -79,7 +87,7 @@ if __name__ == '__main__':
 		feats.frame = booster.getFrame()
 		feats.process_frame(feats.frame)
 		_kp, _des, _matches = feats.detectCombo(feats.frame)
-		pango3d.read_pcl(_kp)
+		_kp = HomogenousCoord(_kp)
 		running = booster.checkBuffer()
 
 	end = cv.getTickCount()		

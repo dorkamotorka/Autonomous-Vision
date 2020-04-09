@@ -5,6 +5,8 @@ from logger import Logger
 import numpy as np
 import signal
 import cv2 as cv
+from skimage.measure import ransac
+from skimage.transform import FundamentalMatrixTransform
 
 cv.namedWindow('image', cv.WINDOW_NORMAL)
 cv.namedWindow('filtered', cv.WINDOW_NORMAL)
@@ -29,7 +31,7 @@ class FeatureExtract(object):
 		log.info("Exiting the program!")
 		os.system('pkill -9 python')	
 
-	def detectCombo(self, img):
+	def detectCombo(self, img): # convert to matrices - fondumental itd"
 		# extract
 		kp = self.fast.detect(img, mask=None)
 		kp = [cv.KeyPoint(x=kps.pt[0], y=kps.pt[1], _size=20) for kps in kp] # adjust _size
