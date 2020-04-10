@@ -38,10 +38,18 @@ class FeatureExtract(object):
 		# describe
 		kp, des = self.orb.compute(img, kp)
 		# match
+		good = []
 		matches = None
 		if self.prev_des is not None:
-			#matches = self.flann.knnMatch(self.prev_des, orb_des, k=2) # zabije!
 			matches = self.bf.match(des, self.prev_des) # zabije!
+			# Lowe's ratio
+			for m,n in matches:
+				if m.distance < 0.75*n.distance:
+					good.append([m])
+			print(good) 	
+
+		# ADD RANSAC AND FONDUMENTAL MATRIX	
+
 		self.prev_des = des			
 		self.filter_img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
 		kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp]) # np.array -- problems with multiprocessing
