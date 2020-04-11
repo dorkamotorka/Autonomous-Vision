@@ -18,13 +18,10 @@ class FeatureExtract(object):
 		# COMBO Algorithm(FAST extractor + ORB descriptor)
 		self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
 		self.orb = cv.ORB_create(nfeatures=700, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
-		FLANN_INDEX_LSH = 6
-		index_params = dict(algorithm = FLANN_INDEX_LSH, table_number = 12, key_size = 20, multi_probe_level = 1)
-		search_params = dict(checks=50)
-		#self.flann = cv.FlannBasedMatcher(index_params, search_params)
 		self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
+		#self.bf = cv.BFMatcher()
 		signal.signal(signal.SIGINT, self.exit_program)
-		self.prev_des = None
+		self.last = None
 		self.filter_img = None
 
 	def exit_program(self, *args): # put in slam
@@ -38,21 +35,29 @@ class FeatureExtract(object):
 		# describe
 		kp, des = self.orb.compute(img, kp)
 		# match
-		good = []
-		matches = None
-		if self.prev_des is not None:
-			matches = self.bf.match(des, self.prev_des) # zabije!
+		good, matches = [], []
+		if self.last is not None:
+			matches = self.bf.knnMatch(des, self.last['des'], k=2) # zabije!
+			matches = np.array(matches)
 			# Lowe's ratio
 			for m,n in matches:
 				if m.distance < 0.75*n.distance:
-					good.append([m])
-			print(good) 	
+					kp1 = kp[m.queryIdx].pt
+					kp2 = self.last['kps'][m.trainIdx].pt
+					good.append((kp1, kp2))
 
-		# ADD RANSAC AND FONDUMENTAL MATRIX	
-
-		self.prev_des = des			
+		if len(good) > 0:
+			good = np.array(good)		
+			model, inliers = ransac((good[:, 0], good[:, 1]),
+						FundamentalMatrixTransform,
+						min_samples=8,
+						residual_threshold=1,
+						max_trials=100)
+			good = good[inliers]
+			
+		self.last = {'kps': kp, 'des': des}			
 		self.filter_img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
-		kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp]) # np.array -- problems with multiprocessing
+		kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp])
 
 		return kp, des, matches
 
