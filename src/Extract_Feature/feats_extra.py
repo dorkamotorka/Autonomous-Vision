@@ -15,11 +15,9 @@ log = Logger('Feats_Extract')
 
 class FeatureExtract(object):
 	def __init__(self):
-		# COMBO Algorithm(FAST extractor + ORB descriptor)
 		self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
 		self.orb = cv.ORB_create(nfeatures=700, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
 		self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
-		#self.bf = cv.BFMatcher()
 		signal.signal(signal.SIGINT, self.exit_program)
 		self.last = None
 		self.filter_img = None
@@ -28,7 +26,7 @@ class FeatureExtract(object):
 		log.info("Exiting the program!")
 		os.system('pkill -9 python')	
 
-	def detectCombo(self, img): # convert to matrices - fondumental itd"
+	def detectCombo(self, img):
 		# extract
 		kp = self.fast.detect(img, mask=None)
 		kp = [cv.KeyPoint(x=kps.pt[0], y=kps.pt[1], _size=20) for kps in kp] # adjust _size
@@ -37,8 +35,7 @@ class FeatureExtract(object):
 		# match
 		good, matches = [], []
 		if self.last is not None:
-			matches = self.bf.knnMatch(des, self.last['des'], k=2) # zabije!
-			matches = np.array(matches)
+			matches = self.bf.knnMatch(des, self.last['des'], k=2)
 			# Lowe's ratio
 			for m,n in matches:
 				if m.distance < 0.75*n.distance:
@@ -47,12 +44,14 @@ class FeatureExtract(object):
 					good.append((kp1, kp2))
 
 		if len(good) > 0:
-			good = np.array(good)		
+			good = np.array(good)	
+			# RANSAC	
 			model, inliers = ransac((good[:, 0], good[:, 1]),
 						FundamentalMatrixTransform,
 						min_samples=8,
 						residual_threshold=1,
 						max_trials=100)
+			print(inliers)
 			good = good[inliers]
 			
 		self.last = {'kps': kp, 'des': des}			

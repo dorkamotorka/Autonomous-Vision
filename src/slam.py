@@ -64,6 +64,9 @@ class Pango3D(object):
 		self.Q.put(pts) # np.array prev
 		#print(self.Q.empty())
 
+# GET CAMERA POSE ACCORDING TO IMAGES
+
+
 #class Point(object):
 #	def __init__(self):
 #		pass
