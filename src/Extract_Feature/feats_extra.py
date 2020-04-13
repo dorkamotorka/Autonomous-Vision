@@ -27,15 +27,18 @@ class FeatureExtract(object):
 		os.system('pkill -9 python')	
 
 	def detectCombo(self, img):
+		blur = cv.GaussianBlur(img, (5,5), 0)
 		# extract
-		kp = self.fast.detect(img, mask=None)
-		kp = [cv.KeyPoint(x=kps.pt[0], y=kps.pt[1], _size=20) for kps in kp] # adjust _size
+		kp = self.fast.detect(blur, mask=None)
+		#kp = [cv.KeyPoint(x=kps.pt[0], y=kps.pt[1], _size=20) for kps in kp] # adjust _size
 		# describe
-		kp, des = self.orb.compute(img, kp)
+		kp, des = self.orb.compute(blur, kp)
 		# match
 		good, matches = [], []
 		if self.last is not None:
 			matches = self.bf.knnMatch(des, self.last['des'], k=2)
+			matches = np.array(matches)
+			print(f"MATCHES: {matches.shape[0]}")
 			# Lowe's ratio
 			for m,n in matches:
 				if m.distance < 0.75*n.distance:
@@ -44,15 +47,16 @@ class FeatureExtract(object):
 					good.append((kp1, kp2))
 
 		if len(good) > 0:
-			good = np.array(good)	
+			good = np.array(good)
+			print(f"GOOD: {good.shape[0]}")	
 			# RANSAC	
 			model, inliers = ransac((good[:, 0], good[:, 1]),
 						FundamentalMatrixTransform,
 						min_samples=8,
 						residual_threshold=1,
 						max_trials=100)
-			print(inliers)
 			good = good[inliers]
+			#print(good)
 			
 		self.last = {'kps': kp, 'des': des}			
 		self.filter_img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
