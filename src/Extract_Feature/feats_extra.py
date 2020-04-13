@@ -48,6 +48,7 @@ class FeatureExtract(object):
 
 		if len(good) > 0:
 			good = np.array(good)
+			self.normalize(good)
 			print(f"GOOD: {good.shape[0]}")	
 			# RANSAC	
 			model, inliers = ransac((good[:, 0], good[:, 1]),
@@ -64,6 +65,14 @@ class FeatureExtract(object):
 
 		return kp, des, matches
 
+
+	def normalize(self, norm_arr): # put in helpers
+		maxpix = np.amax(norm_arr)
+		norm_arr = norm_arr/maxpix # FIX?
+		print(norm_arr)
+		
+	def denormalize(self, denom_arr):
+		
 
 	def process_frame(self, img):
 		cv.imshow('image', img)
