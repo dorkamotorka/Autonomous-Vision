@@ -4,24 +4,35 @@ sys.path.append('..')
 sys.path.append('../GUI')
 from logger import Logger
 import numpy as np
-import signal
 import cv2 as cv
 from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform
 
 log = Logger('Feats_Extract')
 
+# maybe to dictionaries
+FAST_THRESHOLD = 10
+FAST_SUPRESSION = True
+FAST_TYPE = cv.FAST_FEATURE_DETECTOR_TYPE_9_16
+ORB_NFEATS = 700
+ORB_SCALEFACTOR = 1.5
+ORB_NLEVELS = 3
+ORB_EDGETHRESHOLD = 31
+ORB_FIRSTLEVEL = 0
+ORB_WTAK = 2
+ORB_SCORETYPE = cv.ORB_HARRIS_SCORE
+ORB_PATCHSIZE = 31
+ORB_FASTTHRESHOLD = 20
+BF_TYPE = cv.NORM_HAMMING
+BF_CROSSCHECK = True
+
+
 class FeatureExtract(object):
     def __init__(self):
         self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
         self.orb = cv.ORB_create(nfeatures=700, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
         self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
-        signal.signal(signal.SIGINT, self.exit_program)
         self.last = None
-
-    def exit_program(self, *args): # put in slam
-        log.info("Exiting the program!")
-        os.system('pkill -9 python')	
 
     def detectCombo(self, img):
         blur = cv.GaussianBlur(img, (5,5), 0)
@@ -69,10 +80,3 @@ class FeatureExtract(object):
 
     def denormalize(self, denom_arr):
         pass		
-    '''
-    def process_frame(self, img, kpoints):
-        cv.imshow('image', img)
-        img = cv.drawKeypoints(img, keypoints=kpoints, outImage=None, color=(255,0,0))
-        cv.imshow('filtered', img)
-        cv.waitKey(1)
-    '''
