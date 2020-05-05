@@ -17,7 +17,7 @@ class DynamicConfigure(object):
 
 
 
-    def track(self):
+    def track(self, img):
         num = cv.getTrackbarPos('NumKeyPoints', self.win)
         toggle = cv.getTrackbarPos(switch, self.win)
 
@@ -25,7 +25,8 @@ class DynamicConfigure(object):
             img[:] = 0
         else:
             img[:] = [num]
-
+        
+        return img
 
 
 
