@@ -3,15 +3,11 @@ import sys
 sys.path.append('..')
 sys.path.append('../GUI')
 from logger import Logger
-from dyconfigure import DynamicConfigure
 import numpy as np
 import signal
 import cv2 as cv
 from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform
-
-cv.namedWindow('image', cv.WINDOW_NORMAL)
-cv.namedWindow('filtered', cv.WINDOW_NORMAL)
 
 log = Logger('Feats_Extract')
 
@@ -20,10 +16,8 @@ class FeatureExtract(object):
         self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
         self.orb = cv.ORB_create(nfeatures=700, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
         self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
-        self.cfg = DynamicConfigure()
         signal.signal(signal.SIGINT, self.exit_program)
         self.last = None
-        self.filter_img = None
 
     def exit_program(self, *args): # put in slam
         log.info("Exiting the program!")
@@ -63,8 +57,7 @@ class FeatureExtract(object):
             #print(good)
             
         self.last = {'kps': kp, 'des': des}			
-        self.filter_img = cv.drawKeypoints(img, keypoints=kp, outImage=None, color=(255,0,0))
-        kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp])
+        #kp = np.array([(kps.pt[0], kps.pt[1]) for kps in kp])
 
         return kp, des, matches
 
@@ -76,10 +69,10 @@ class FeatureExtract(object):
 
     def denormalize(self, denom_arr):
         pass		
-
-    def process_frame(self, img):
+    '''
+    def process_frame(self, img, kpoints):
         cv.imshow('image', img)
-        if self.filter_img is not None:
-            cv.imshow('filtered', self.filter_img)
+        img = cv.drawKeypoints(img, keypoints=kpoints, outImage=None, color=(255,0,0))
+        cv.imshow('filtered', img)
         cv.waitKey(1)
-
+    '''
