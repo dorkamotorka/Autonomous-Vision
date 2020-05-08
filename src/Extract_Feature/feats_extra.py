@@ -17,11 +17,9 @@ class FeatureExtract(object):
         self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
         self.last = None
     
-    def ParamsCallback(self, N_FEATS):
-        print(N_FEATS)
-        self.orb = cv.ORB_create(nfeatures=N_FEATS, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
-        #self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
-        #self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
+    def ParamsCallback(self, x):
+        #print(x)
+        pass
 
     def detectCombo(self, img):
         blur = cv.GaussianBlur(img, (5,5), 0)
