@@ -14,18 +14,11 @@ import numpy as np
 
 
 running = True
-win = 'processed'
+win = 'Processed'
+trackbar = 'Configuration'
 cv.namedWindow('image', cv.WINDOW_NORMAL)
 cv.namedWindow(win, cv.WINDOW_NORMAL)
-
-
-def ParamsCallback():
-    pass
-
-cv.createTrackbar('NumKeyPoints', win, 100, 1000, ParamsCallback)
-switch = '0 : OFF \n1 : ON'
-cv.createTrackbar(switch, win, 0,1, ParamsCallback)
-
+cv.namedWindow(trackbar, flags=cv.WINDOW_AUTOSIZE)
 
 def HomogenousCoord(pts):
     # [x,y] -> [x,y,1]
@@ -40,18 +33,13 @@ class Slam(object):
         self.feats = FeatureExtract()
         #self.pango3d = Pango3D()
         self.booster = BoostedFPS('test_countryroad.mp4')
-
+        cv.createTrackbar('NumKeyPoints', trackbar, 100, 1000, lambda nothing : nothing)
 
     def process_frame(self, img):
         cv.imshow('image', img) 
-        num = cv.getTrackbarPos('NumKeyPoints', win)
-        toggle = cv.getTrackbarPos(switch, win) 
+        num = cv.getTrackbarPos('NumKeyPoints', trackbar)
+        self.feats.ParamsCallback(num)
         _kp, _des, _matches = self.feats.detectCombo(img)
-        if toggle == 0:
-             img[:] = 0
-        else:
-            img[:] = [num]
- 
         cv.drawKeypoints(img, keypoints=_kp, outImage=img, color=(255,0,0))
         cv.imshow(win, img)
         cv.waitKey(1)

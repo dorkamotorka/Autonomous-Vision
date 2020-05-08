@@ -10,29 +10,18 @@ from skimage.transform import FundamentalMatrixTransform
 
 log = Logger('Feats_Extract')
 
-# maybe to dictionaries
-FAST_THRESHOLD = 10
-FAST_SUPRESSION = True
-FAST_TYPE = cv.FAST_FEATURE_DETECTOR_TYPE_9_16
-ORB_NFEATS = 700
-ORB_SCALEFACTOR = 1.5
-ORB_NLEVELS = 3
-ORB_EDGETHRESHOLD = 31
-ORB_FIRSTLEVEL = 0
-ORB_WTAK = 2
-ORB_SCORETYPE = cv.ORB_HARRIS_SCORE
-ORB_PATCHSIZE = 31
-ORB_FASTTHRESHOLD = 20
-BF_TYPE = cv.NORM_HAMMING
-BF_CROSSCHECK = True
-
-
 class FeatureExtract(object):
     def __init__(self):
         self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
         self.orb = cv.ORB_create(nfeatures=700, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
         self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
         self.last = None
+    
+    def ParamsCallback(self, N_FEATS):
+        print(N_FEATS)
+        self.orb = cv.ORB_create(nfeatures=N_FEATS, scaleFactor=1.5, nlevels=3, edgeThreshold=31, firstLevel=0, WTA_K=2, scoreType=cv.ORB_HARRIS_SCORE, patchSize=31, fastThreshold=20)
+        #self.fast = cv.FastFeatureDetector_create(threshold=10, nonmaxSuppression=True, type=cv.FAST_FEATURE_DETECTOR_TYPE_9_16) 	
+        #self.bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=False)
 
     def detectCombo(self, img):
         blur = cv.GaussianBlur(img, (5,5), 0)
