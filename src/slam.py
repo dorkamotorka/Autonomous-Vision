@@ -1,17 +1,14 @@
 # main program for all classes
-from logger import Logger
-import signal
-import sys
 import os
-sys.path.append('Extract_Feature')
-from qbooster import BoostedFPS
-from feats_extra import FeatureExtract
-sys.path.append('GUI')
+import sys
+import signal
 import cv2 as cv
 import numpy as np
+from utils.logger import Logger
+from Extract_Feature.qbooster import BoostedFPS
+from Extract_Feature.feats_extra import FeatureExtract
 
 
-running = True
 #trackbar = 'Configuration'
 cv.namedWindow('Original', cv.WINDOW_NORMAL)
 cv.namedWindow('Processed', cv.WINDOW_NORMAL)
@@ -23,6 +20,7 @@ def main():
     slam = Slam()
     signal.signal(signal.SIGINT, slam.exit_program)
     start = cv.getTickCount()	
+    running = True
 
     while running:
         frame = slam.booster.getFrame() # move
@@ -43,7 +41,7 @@ class Slam(object):
         #cv.createTrackbar('NumKeyPoints', trackbar, 100, 1000, lambda nothing : nothing)
 
     def process_frame(self, img):
-        cv.imshow('image', img) 
+        cv.imshow('Original', img) 
         #num = cv.getTrackbarPos('value_name', trackbar)
         #self.feats.ParamsCallback(num)
         _kp, _des, _matches = self.feats.detectCombo(img)
@@ -53,11 +51,9 @@ class Slam(object):
 
 
     def exit_program(self, *args):
-        global running
         print("Exiting the program!")
         os.system('pkill -9 python')
         self.booster.stopStream()
-        running = False
 
 
 #put in main
