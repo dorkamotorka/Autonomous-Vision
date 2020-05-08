@@ -1,14 +1,9 @@
-import os
-import sys
-sys.path.append('..')
-sys.path.append('../GUI')
-from logger import Logger
 import numpy as np
 import cv2 as cv
 from skimage.measure import ransac
 from skimage.transform import FundamentalMatrixTransform
+#import utils.helper
 
-log = Logger('Feats_Extract')
 
 class FeatureExtract(object):
     def __init__(self):
@@ -43,7 +38,7 @@ class FeatureExtract(object):
 
         if len(good) > 0:
             good = np.array(good)
-            self.normalize(good)
+            #util.normalize(good)
             print(f"GOOD: {good.shape[0]}")	
             # RANSAC	
             model, inliers = ransac((good[:, 0], good[:, 1]),
@@ -60,10 +55,3 @@ class FeatureExtract(object):
         return kp, des, matches
 
 
-    def normalize(self, norm_arr): # put in helpers
-        maxpix = np.amax(norm_arr)
-        norm_arr = norm_arr/maxpix # FIX?
-        print(norm_arr)
-
-    def denormalize(self, denom_arr):
-        pass		

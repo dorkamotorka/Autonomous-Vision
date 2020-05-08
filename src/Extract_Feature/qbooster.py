@@ -1,9 +1,8 @@
-import sys
-sys.path.append('..')
-from logger import Logger
-from threading import Thread
-from queue import Queue
 import cv2 as cv
+from queue import Queue
+from threading import Thread
+from utils.logger import Logger
+
 
 log = Logger('FPS_Thread')
 
